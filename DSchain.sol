@@ -215,6 +215,7 @@ struct File {
         address dataowner;
 }
 
+/*
 VARIABLES:
 address private owner;
 mapping(address => User) private userNetwork;
@@ -236,3 +237,4 @@ function txorigin() public view returns (address);
 
 *might have to change msg.sender to playerAddress or something bc msg.sender might not be who I want it to be
 *added testing functions in case to see
+*/
