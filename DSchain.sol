@@ -200,7 +200,7 @@ contract DSchain {
     }
 }
 
-
+/*
 STRUCTS:
 struct User {
         address addr;
@@ -215,7 +215,6 @@ struct File {
         address dataowner;
 }
 
-/*
 VARIABLES:
 address private owner;
 mapping(address => User) private userNetwork;
