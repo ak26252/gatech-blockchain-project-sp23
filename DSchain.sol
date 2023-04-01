@@ -187,6 +187,10 @@ contract DSchain {
         return userNetwork[msg.sender].notification;
     }
 
+    function isUser() public view returns (bool) {
+        return userNetwork[msg.sender].addr != address(0x0);
+    }
+
     //TESTING FUNCTIONS
 
     //returns msg.sender
