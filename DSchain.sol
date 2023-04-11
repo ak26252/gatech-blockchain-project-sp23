@@ -291,7 +291,6 @@ contract DSchain {
     */
     function getHash(address inputaddr) public view returns (File[] memory){
         require(userNetwork[inputaddr].addr != address(0x0), "YOU ARE NOT A CURRENT USER");
-        require(msg.sender == inputaddr, "msg.sender != inputaddr");
 
         //get file array
         return userFiles[inputaddr];
@@ -315,9 +314,9 @@ contract DSchain {
     /*
     -get notification status
     */
-    function hasNotification(address inputaddr) public view returns (bool) {
+    function hasNotification(address inputaddr) public view returns (uint) {
         require(userNetwork[inputaddr].addr != address(0x0), "YOU ARE NOT A CURRENT USER");
-        return userNetwork[inputaddr].notification;
+        return userNetwork[inputaddr].notification_contents.length;
     }
 
     /*
