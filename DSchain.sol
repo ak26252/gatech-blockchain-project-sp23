@@ -123,8 +123,15 @@ contract DSchain {
         require(userNetwork[subaddr].addr != address(0x0), "SUBSCRIBER NOT A CURRENT USER");
         require(msg.sender == inputaddr, "msg.sender != inputaddr");
 
-        //add subscriber
-        userNetwork[inputaddr].subscribers.push(subaddr);
+        //make sure subscriber not a current sub already
+        if(findSubscriber(inputaddr, subaddr) == -1){
+            //add subscriber
+            userNetwork[inputaddr].subscribers.push(subaddr);
+
+            //notification
+            string memory addr = Strings.toHexString(uint256(uint160(inputaddr)),20);
+            userNetwork[subaddr].notification_contents.push(string.concat(addr," has added you as a subscriber"));
+        }
     }
 
     /*
@@ -156,6 +163,8 @@ contract DSchain {
             //replace with last element
             userNetwork[inputaddr].subscribers[uint(index)] = userNetwork[inputaddr].subscribers[userNetwork[inputaddr].subscribers.length-1];
             userNetwork[inputaddr].subscribers.pop();
+            string memory addr = Strings.toHexString(uint256(uint160(inputaddr)),20);
+            userNetwork[subaddr].notification_contents.push(string.concat(addr," has removed you as a subscriber"));
         }
         else{
             err = false;
@@ -183,8 +192,15 @@ contract DSchain {
         require(userNetwork[pubaddr].addr != address(0x0), "PUBLISHER NOT A CURRENT USER");
         require(msg.sender == inputaddr, "msg.sender != inputaddr");
 
-        //add publisher
-        userNetwork[inputaddr].publishers.push(pubaddr);
+        if(findPublisher(inputaddr, pubaddr) == -1){
+            //add publisher
+            userNetwork[inputaddr].publishers.push(pubaddr);
+
+            //notification
+            string memory addr = Strings.toHexString(uint256(uint160(inputaddr)),20);
+            userNetwork[pubaddr].notification_contents.push(string.concat(addr," has added you as a publisher"));
+        }
+        
     }
 
     /*
@@ -216,6 +232,8 @@ contract DSchain {
             //replace with last element
             userNetwork[inputaddr].publishers[uint(index)] = userNetwork[inputaddr].publishers[userNetwork[inputaddr].publishers.length-1];
             userNetwork[inputaddr].publishers.pop();
+            string memory addr = Strings.toHexString(uint256(uint160(inputaddr)),20);
+            userNetwork[pubaddr].notification_contents.push(string.concat(addr," has removed you as publisher"));
         }
         else{
             err = false;
