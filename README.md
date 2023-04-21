@@ -1,5 +1,13 @@
 # gatech-blockchain-project-sp23
 
+Welcome to...
+________    _________      .__           .__        
+\______ \  /   _____/ ____ |  |__ _____  |__| ____  
+ |    |  \ \_____  \_/ ___\|  |  \\__  \ |  |/    \ 
+ |    `   \/        \  \___|   Y  \/ __ \|  |   |  \
+/_______  /_______  /\___  >___|  (____  /__|___|  /
+        \/        \/     \/     \/     \/        \/ 
+
 This is the code repository for my data sharing blockchain project. This solution utilizes Fast Fully Homomorphic Encryption Over the Torus (TFHE) for privacy preservation as well as Interplanetary File System (IPFS) for decentralized storage and data immutability. Ethereum is used as the blockchain environment.
 
 With the code here, you can:
