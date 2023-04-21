@@ -1,15 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.19;
 
-import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/Strings.sol";
-
 contract DSchain {
 
     //owner of contract
     address private owner;
-
-    address private sender;
-    address private origin;
 
     /*
     -user struct
@@ -18,9 +13,7 @@ contract DSchain {
         address addr;
         bool isDataOwner;
         address[] subscribers;
-        address[] publishers;
         bool notification;
-        string[] notification_contents;
     }
 
     /*
@@ -77,7 +70,6 @@ contract DSchain {
         //not already in network
         //require(msg.sender == tx.origin);
         require(userNetwork[inputaddr].addr == address(0x0));
-        require(msg.sender == inputaddr, "msg.sender != inputaddr");
         
         //create new user
         User memory newUser;
@@ -98,7 +90,6 @@ contract DSchain {
         //require(msg.sender == tx.origin);
         require(userNetwork[inputaddr].isDataOwner == true, "YOU MUST BE A DATA OWNER!");
         require(userNetwork[useraddr].addr != address(0x0), "NOT A CURRENT USER");
-        require(msg.sender == inputaddr, "msg.sender != inputaddr");
         
         //make user a data owner
         userNetwork[useraddr].isDataOwner = true;
@@ -121,56 +112,37 @@ contract DSchain {
         //require(msg.sender == tx.origin);
         require(userNetwork[inputaddr].addr != address(0x0), "YOU ARE NOT A CURRENT USER");
         require(userNetwork[subaddr].addr != address(0x0), "SUBSCRIBER NOT A CURRENT USER");
-        require(msg.sender == inputaddr, "msg.sender != inputaddr");
 
-        //make sure subscriber not a current sub already
-        if(findSubscriber(inputaddr, subaddr) == -1){
-            //add subscriber
-            userNetwork[inputaddr].subscribers.push(subaddr);
-
-            //notification
-            string memory addr = Strings.toHexString(uint256(uint160(inputaddr)),20);
-            userNetwork[subaddr].notification_contents.push(string.concat(addr," has added you as a subscriber"));
-        }
+        //add subscriber
+        userNetwork[inputaddr].subscribers.push(subaddr);
     }
 
     /*
     -find index of subscriber
     */
-    function findSubscriber(address inputaddr, address subaddr) private view returns (int){
+    function findSubscriber(address inputaddr, address subaddr) private view returns (uint){
         for(uint i = 0; i < userNetwork[inputaddr].subscribers.length; i++){
             if(userNetwork[inputaddr].subscribers[i] == subaddr){
-                return int(i);
+                return i;
             }
         }
         //proper error handling later
-        return -1;
+        return 0;
     }
 
     /*
     -remove a subscriber
     */
-    function removeSubscriber(address inputaddr, address subaddr) public returns (bool){
+    function removeSubscriber(address inputaddr, address subaddr) public {
         require(userNetwork[inputaddr].addr != address(0x0), "YOU ARE NOT A CURRENT USER");
         require(userNetwork[subaddr].addr != address(0x0), "SUBSCRIBER NOT A CURRENT USER");
-        require(msg.sender == inputaddr, "msg.sender != inputaddr");
 
-        bool err = true;
+        uint index = findSubscriber(inputaddr, subaddr);
 
-        int index = findSubscriber(inputaddr, subaddr);
-
-        if(index != -1){
-            //replace with last element
-            userNetwork[inputaddr].subscribers[uint(index)] = userNetwork[inputaddr].subscribers[userNetwork[inputaddr].subscribers.length-1];
-            userNetwork[inputaddr].subscribers.pop();
-            string memory addr = Strings.toHexString(uint256(uint160(inputaddr)),20);
-            userNetwork[subaddr].notification_contents.push(string.concat(addr," has removed you as a subscriber"));
-        }
-        else{
-            err = false;
-        }
-
-        return err;
+        //replace with last element
+        userNetwork[inputaddr].subscribers[index] = userNetwork[inputaddr].subscribers[userNetwork[inputaddr].subscribers.length-1];
+        userNetwork[inputaddr].subscribers.pop();
+        
     }
 
     /*
@@ -179,75 +151,6 @@ contract DSchain {
     function getSubscribers(address inputaddr) public view returns (address[] memory) {
         require(userNetwork[inputaddr].addr != address(0x0), "YOU ARE NOT A CURRENT USER");
         return userNetwork[inputaddr].subscribers;
-    }
-
-     /*
-    -add publisher
-    -require user
-    -only publisher can add publisher
-    */
-    function addPublisher(address inputaddr, address pubaddr) public {
-        //require(msg.sender == tx.origin);
-        require(userNetwork[inputaddr].addr != address(0x0), "YOU ARE NOT A CURRENT USER");
-        require(userNetwork[pubaddr].addr != address(0x0), "PUBLISHER NOT A CURRENT USER");
-        require(msg.sender == inputaddr, "msg.sender != inputaddr");
-
-        if(findPublisher(inputaddr, pubaddr) == -1){
-            //add publisher
-            userNetwork[inputaddr].publishers.push(pubaddr);
-
-            //notification
-            string memory addr = Strings.toHexString(uint256(uint160(inputaddr)),20);
-            userNetwork[pubaddr].notification_contents.push(string.concat(addr," has added you as a publisher"));
-        }
-        
-    }
-
-    /*
-    -find index of publisher
-    */
-    function findPublisher(address inputaddr, address pubaddr) private view returns (int){
-        for(uint i = 0; i < userNetwork[inputaddr].publishers.length; i++){
-            if(userNetwork[inputaddr].publishers[i] == pubaddr){
-                return int(i);
-            }
-        }
-        //proper error handling later
-        return -1;
-    }
-
-    /*
-    -remove a publisher
-    */
-    function removepublisher(address inputaddr, address pubaddr) public returns (bool){
-        require(userNetwork[inputaddr].addr != address(0x0), "YOU ARE NOT A CURRENT USER");
-        require(userNetwork[pubaddr].addr != address(0x0), "PUBLISHER NOT A CURRENT USER");
-        require(msg.sender == inputaddr, "msg.sender != inputaddr");
-
-        bool err = true;
-
-        int index = findPublisher(inputaddr, pubaddr);
-
-        if(index != -1){
-            //replace with last element
-            userNetwork[inputaddr].publishers[uint(index)] = userNetwork[inputaddr].publishers[userNetwork[inputaddr].publishers.length-1];
-            userNetwork[inputaddr].publishers.pop();
-            string memory addr = Strings.toHexString(uint256(uint160(inputaddr)),20);
-            userNetwork[pubaddr].notification_contents.push(string.concat(addr," has removed you as publisher"));
-        }
-        else{
-            err = false;
-        }
-        
-        return err;    
-    }
-
-    /*
-    -get publishers list
-    */
-    function getPublishers(address inputaddr) public view returns (address[] memory) {
-        require(userNetwork[inputaddr].addr != address(0x0), "YOU ARE NOT A CURRENT USER");
-        return userNetwork[inputaddr].publishers;
     }
 
     /*
@@ -268,36 +171,22 @@ contract DSchain {
     -get timestamp
     -update subscriber file hash timestamp tuples
     */
-    function uploadHash(string memory hash, address inputaddr) public returns (bool) {
+    function uploadHash(string memory hash, address inputaddr) public {
         //require(msg.sender == tx.origin);
         require(userNetwork[inputaddr].addr != address(0x0), "YOU ARE NOT A CURRENT USER");
-        require(msg.sender == inputaddr, "msg.sender != inputaddr");
-
-        bool err = true;
 
         //for every subscriber add hash to their files and give notification
         File memory newfile = createFile(hash, inputaddr);
         for(uint i = 0; i < userNetwork[inputaddr].subscribers.length; i++){
             //get subscriber
             address sub = userNetwork[inputaddr].subscribers[i];
+            
+            //add hash
+            userFiles[sub].push(newfile);
 
-            //check that inputaddr in sub publishers list
-            //only upload file if input addr is a verified publisher for the subscriber
-            if(findPublisher(sub, inputaddr) != -1){
-                //add hash
-                userFiles[sub].push(newfile);
-
-                //update notification
-                userNetwork[sub].notification = true;
-                string memory addr = Strings.toHexString(uint256(uint160(inputaddr)),20);
-                userNetwork[sub].notification_contents.push(string.concat(addr," has sent you a new file!"));
-            }
-            else{
-                err = false;
-            }
+            //update notification
+            userNetwork[sub].notification = true;
         }
-
-        return err;
 
     }
 
@@ -320,29 +209,17 @@ contract DSchain {
     */
     function clearNotification(address inputaddr) public {
         require(userNetwork[inputaddr].addr != address(0x0), "YOU ARE NOT A CURRENT USER");
-        require(msg.sender == inputaddr, "msg.sender != inputaddr");
 
         //set notification to false
         userNetwork[inputaddr].notification = false;
-
-        //clear notification
-        delete userNetwork[inputaddr].notification_contents;
     }
 
     /*
     -get notification status
     */
-    function hasNotification(address inputaddr) public view returns (uint) {
+    function hasNotification(address inputaddr) public view returns (bool) {
         require(userNetwork[inputaddr].addr != address(0x0), "YOU ARE NOT A CURRENT USER");
-        return userNetwork[inputaddr].notification_contents.length;
-    }
-
-    /*
-    -get notification contents
-    */
-    function getNotification(address inputaddr) public view returns (string[] memory) {
-        require(userNetwork[inputaddr].addr != address(0x0), "YOU ARE NOT A CURRENT USER");
-        return userNetwork[inputaddr].notification_contents;
+        return userNetwork[inputaddr].notification;
     }
 
     function isUser(address inputaddr) public view returns (bool) {
@@ -352,22 +229,50 @@ contract DSchain {
     //TESTING FUNCTIONS
 
     //returns msg.sender
-    function msgsenderpure() public view returns (address) {
-        return sender;
+    function msgsender() public view returns (address) {
+        return msg.sender;
     }
 
     //returns tx.origin
-    function txoriginpure() public view returns (address) {
-        return origin;
-    }
-
-    //returns msg.sender
-    function msgsender() public{
-        sender = msg.sender;
-    }
-
-    //returns tx.origin
-    function txorigin() public{
-        origin = tx.origin;
+    function txorigin() public view returns (address) {
+        return tx.origin;
     }
 }
+
+/*
+STRUCTS:
+struct User {
+        address addr;
+        bool isDataOwner;
+        address[] subscribers;
+        bool notification;
+}
+
+struct File {
+        string hash;
+        uint timestamp;
+        address dataowner;
+}
+
+VARIABLES:
+address private owner;
+mapping(address => User) private userNetwork;
+mapping(address => File[]) private userFiles;
+
+FUNCTIONS:
+function getOwner() public view returns(address);
+function joinNetwork(address useraddr) public;
+function addDataOwner(address useraddr) public;
+function isDataOwner() public view returns (bool);
+function addSubscriber(address subaddr) public;
+function getSubscribers() public view returns (address[] memory);
+function createFile(string memory hash, address publisher) private view returns (File memory);
+function uploadHash(string memory hash) public;
+function getHash() public returns (File[] memory);
+function hasNotification() public view returns (bool);
+function msgsender() public view returns (address);
+function txorigin() public view returns (address);
+
+*might have to change msg.sender to playerAddress or something bc msg.sender might not be who I want it to be
+*added testing functions in case to see
+*/

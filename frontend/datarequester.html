@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.4-rc.1/web3.min.js"></script>
+</head>
+
+<body onload="setupFunc()">
+<script>
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const name = urlParams.get('name');
+</script>
+
+<h1 id="pagebanner" style="font-size:50px;margin-top:0px;margin-bottom:40px;">DSchain</h1>
+
+<div>
+    <div class="sidetext">
+        <p id="pagetitle" style="font-size:25px"><strong>Data Requester Page</strong></p>
+    </div>
+
+    <!-- Info section -->
+    <p style="font-size:20px"><i>General Info</i></p>
+    <hr class="solid">
+
+    <div class="sidetext">
+        <p>Your address:</p>
+        <p id="useraddress">0x112233445566778899aabbccddeeff</p>
+    </div>
+    
+    <div class="sidetext">
+        <p>You have</p>
+        <p id="notification"><b>0</b></p>
+        <p> new notification(s)!</p><br><br>
+        <input type="button" id="refresh" onclick="getNotifications()" value="Manual Refresh">
+        <input type="button" id="getNotificationContents" onclick="getNotificationContents()" value="Get Notifications">
+        <input type="button" id="clearNotifications" onclick="clearNotifications()" value="Clear Notifications"><br><br>
+        <p id="notification_list"></p>
+    </div>
+
+    <div class="buttons">
+        <p>Wallet still not connected?</p><br><br>
+        <input type="button" id="connect" onClick="connectWallet()" value="Connect Wallet">
+    </div>
+    
+    <!-- File Management -->
+    <p style="font-size:20px"><i>File Management</i></p>
+    <hr class="solid">
+
+    <div class="ipfshash">
+        <p>IPFS Files List: </p>
+        <label id="downloadhash"></label><br><br>
+        <button onclick="getIPFSHash()">List Files</button><br />
+        <p id="hashlist"></p>
+    </div>
+
+    <div class="ipfshash">
+        <p>IPFS File Hash and Checksum: </p>
+        <input type="text" id="uploadhash" name="uploadhash">
+        <input type="text" id="checksum" name="checksum"><br><br>
+        <button onclick="uploadIPFSHash()">Upload File</button>
+        <p id="uploadstatus"></p>
+    </div>
+
+   <!--  <div class="buttons">
+        <p>Files List:</p><br><br>
+        <input type="button" id="files" onClick="getFiles()" value="Get Files">
+    </div> -->
+
+    <!-- Subscriber Management -->
+    <p style="font-size:20px"><i>Subscriber Management</i></p>
+    <hr class="solid">
+
+    <div class="buttons">
+        <p>Subsribers List:</p><br><br>
+        <input type="button" id="subscribers" onClick="getSubs()" value="Get Subs"><br><br>
+        <p id="subslist"></p> 
+    </div>
+
+    <div class="sidetext">
+        <p>User Address: </p>
+        <input type="text" id="addsub" name="addsub"><br><br>
+        <button onclick="addSubs()">Add Subscriber</button>
+        <button onclick="removeSubs()">Remove Subscriber</button>
+        <p id="addsubstatus"></p>
+    </div>
+
+    <!-- Publisher Management -->
+    <p style="font-size:20px"><i>Publisher Management</i></p>
+    <hr class="solid">
+
+    <div class="buttons">
+        <p>Publishers List:</p><br><br>
+        <input type="button" id="publishers" onClick="getPubs()" value="Get Pubs"><br><br>
+        <p id="pubslist"></p> 
+    </div>
+
+    <div class="sidetext">
+        <p>User Address: </p>
+        <input type="text" id="addpub" name="addpub"><br><br>
+        <button onclick="addPubs()">Add Publisher</button>
+        <button onclick="removePubs()">Remove Publisher</button>
+        <p id="addpubstatus"></p>
+    </div>
+
+    <div class="buttons">
+        <input type="button" id="test" onClick="testFunc()" value="Test">
+    </div>
+</div>
+
+<script>
+    let web3;
+    const connectWallet = async () => {
+        if(window.ethereum){
+            await window.ethereum.request({method: "eth_requestAccounts"});
+            web3 = new Web3(window.ethereum);
+            const account = web3.eth.accounts;
+            // const walletAddress = account.givenProvider.selectAddress;
+            const walletAddress = await web3.eth.getAccounts();
+            console.log("Wallet Address: %s", walletAddress[0]);
+        }
+        else{
+            console.log("No web3 found...");
+        }
+    }
+</script>
+
+<script>
+    const abi = [
+    {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "useraddr",
+                "type": "address"
+            }
+        ],
+        "name": "addDataOwner",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "pubaddr",
+                "type": "address"
+            }
+        ],
+        "name": "addPublisher",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "subaddr",
+                "type": "address"
+            }
+        ],
+        "name": "addSubscriber",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            }
+        ],
+        "name": "clearNotification",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            }
+        ],
+        "name": "getHash",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "string",
+                        "name": "hash",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "timestamp",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "dataowner",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "checksum",
+                        "type": "string"
+                    }
+                ],
+                "internalType": "struct DSchain.File[]",
+                "name": "",
+                "type": "tuple[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            }
+        ],
+        "name": "getNotification",
+        "outputs": [
+            {
+                "internalType": "string[]",
+                "name": "",
+                "type": "string[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getOwner",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            }
+        ],
+        "name": "getPublishers",
+        "outputs": [
+            {
+                "internalType": "address[]",
+                "name": "",
+                "type": "address[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            }
+        ],
+        "name": "getSubscribers",
+        "outputs": [
+            {
+                "internalType": "address[]",
+                "name": "",
+                "type": "address[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            }
+        ],
+        "name": "hasNotification",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            }
+        ],
+        "name": "isDataOwner",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            }
+        ],
+        "name": "isUser",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            }
+        ],
+        "name": "joinNetwork",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "msgsender",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "msgsenderpure",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "subaddr",
+                "type": "address"
+            }
+        ],
+        "name": "removeSubscriber",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "pubaddr",
+                "type": "address"
+            }
+        ],
+        "name": "removepublisher",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "txorigin",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "txoriginpure",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "hash",
+                "type": "string"
+            },
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            },
+            {
+                "internalType": "string",
+                "name": "checksum",
+                "type": "string"
+            }
+        ],
+        "name": "uploadHash",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    }
+]
+    const contractaddr = "0x0cC97D70A3DB9241a3E4d52f51b818A97C8b01E6";
+
+    //onload setup function
+    const setupFunc = async() => {
+
+        //check if wallet is connected
+        if(window.ethereum){
+            web3 = new Web3(window.ethereum);
+            const checkWallet = await web3.eth.getAccounts();
+            if(checkWallet.length > 0){
+                console.log("Wallet connected :)");
+                console.log("attempt 7");
+                //console.log(checkWallet);
+                //console.log(checkWallet[0]);
+
+                //load player address
+                const playerAddress = checkWallet[0];
+                document.getElementById("useraddress").innerHTML = playerAddress;
+
+                //load contract
+                const contract = new web3.eth.Contract(abi, contractaddr);
+                console.log(contract);
+
+                //check if in network
+                var network_status = await contract.methods.isUser(playerAddress).call();
+                //console.log(network_status);
+                if(!network_status){
+                    alert("Not a user yet! Redirecting to home page.");
+                    location.href = "https://ak26252.github.io/index.html";
+                }
+
+                //get notifications
+                var notif_status = await contract.methods.hasNotification(playerAddress).call();
+                console.log(notif_status);
+                if(notif_status > 0){
+                    //console.log("New notification!");
+                    document.getElementById("notification").innerHTML = notif_status;
+                }
+                else{
+                    //console.log("No new notification.");
+                    document.getElementById("notification").innerHTML = "0";
+                }
+                
+            }   
+            else{
+                alert("Wallet not connected. Please connect your wallet!");
+                console.log("Wallet NOT connected :(");
+            }
+        }
+        else{
+            alert("Wallet not connected. Please connect your wallet!");
+            console.log("Wallet NOT connected :(");
+        }
+    }
+
+    //check notifications
+    const getNotifications = async() => {
+        console.log("Checking for notifications...");
+        if(window.ethereum){
+            web3 = new Web3(window.ethereum);
+            const checkWallet = await web3.eth.getAccounts();
+            if(checkWallet.length > 0){
+        
+                //load player address
+                const playerAddress = checkWallet[0];
+                // document.getElementById("owneraddress").innerHTML = playerAddress;
+
+                //load contract
+                const contract = new web3.eth.Contract(abi, contractaddr);
+                //console.log(contract);
+
+                //get notifications
+                var notif_status = await contract.methods.hasNotification(playerAddress).call();
+                console.log(notif_status);
+                if(notif_status > 0){
+                    //console.log("New notification!");
+                    document.getElementById("notification").innerHTML = notif_status;
+                }
+                else{
+                    //console.log("No new notification.");
+                    document.getElementById("notification").innerHTML = "0";
+                }
+                
+            }   
+            else{
+                //alert("Wallet not connected. Please connect your wallet!");
+                console.log("Wallet NOT connected :(");
+            }
+        }
+        else{
+            //alert("Wallet not connected. Please connect your wallet!");
+            console.log("Wallet NOT connected :(");
+        }
+    }
+    //setInterval(getNotifications, 10000);
+
+    //get notification contents
+    const getNotificationContents = async() => {
+        console.log("Retrieving notifications...");
+        if(window.ethereum){
+            web3 = new Web3(window.ethereum);
+            const checkWallet = await web3.eth.getAccounts();
+            if(checkWallet.length > 0){
+        
+                //load player address
+                const playerAddress = checkWallet[0];
+                // document.getElementById("owneraddress").innerHTML = playerAddress;
+
+                //load contract
+                const contract = new web3.eth.Contract(abi, contractaddr);
+                //console.log(contract);
+
+                //get notifications
+                var notifications = await contract.methods.getNotification(playerAddress).call();
+
+                var notifications_array = "";
+                for(var i = 0; i < notifications.length; i++){
+                    var num = i+1;
+                    notifications_array += num + ".) " + notifications[i] + "<br />";
+                }
+                document.getElementById("notification_list").innerHTML = notifications_array;
+                
+            }   
+            else{
+                //alert("Wallet not connected. Please connect your wallet!");
+                console.log("Wallet NOT connected :(");
+            }
+        }
+        else{
+            //alert("Wallet not connected. Please connect your wallet!");
+            console.log("Wallet NOT connected :(");
+        }
+    }
+
+    //clear notification contents
+    const clearNotifications = async() => {
+        console.log("Clearing notifications...");
+        if(window.ethereum){
+            web3 = new Web3(window.ethereum);
+            const checkWallet = await web3.eth.getAccounts();
+            if(checkWallet.length > 0){
+        
+                //load player address
+                const playerAddress = checkWallet[0];
+                // document.getElementById("owneraddress").innerHTML = playerAddress;
+
+                //load contract
+                const contract = new web3.eth.Contract(abi, contractaddr);
+                //console.log(contract);
+
+                //clear notifications
+                var clear_notif = await contract.methods.clearNotification(playerAddress).send({from: playerAddress});
+
+                document.getElementById("notification_list").innerHTML = "";
+                document.getElementById("notification").innerHTML = "0";                
+            }   
+            else{
+                //alert("Wallet not connected. Please connect your wallet!");
+                console.log("Wallet NOT connected :(");
+            }
+        }
+        else{
+            //alert("Wallet not connected. Please connect your wallet!");
+            console.log("Wallet NOT connected :(");
+        }
+    }
+
+    //get ipfs hash
+    const getIPFSHash = async() => {
+        console.log("Getting IPFS hash");
+        if(window.ethereum){
+            web3 = new Web3(window.ethereum);
+            const checkWallet = await web3.eth.getAccounts();
+            if(checkWallet.length > 0){
+        
+                //load player address
+                const playerAddress = checkWallet[0];
+                // document.getElementById("owneraddress").innerHTML = playerAddress;
+
+                //load contract
+                const contract = new web3.eth.Contract(abi, contractaddr);
+                //console.log(contract);
+
+                //get file hashes
+                var file_hash = await contract.methods.getHash(playerAddress).call();
+                //var clear_notif = await contract.methods.clearNotification(playerAddress).send({from: playerAddress});
+                console.log(file_hash);
+                //print files
+                var hash_array = "<br />";
+                var tab = "&emsp;" + "|" + "&emsp;";
+                for(var i = 0; i < file_hash.length; i++){
+                    var hash = "";
+                    var date_str = "";
+                    var owner = "";
+                    var checksum = "";
+                    for(var j = 0; j < 4; j++){
+                        if(j==0){
+                            hash = file_hash[i][j];
+                        }
+                        else if(j==1){
+                            var date = new Date(file_hash[i][j]*1000);
+                            date_str = date.toLocaleString();
+                        }
+                        else if(j==2){
+                            owner = file_hash[i][j];
+                        }
+                        else{
+                            checksum = file_hash[i][j];
+                        }
+                    }
+                    hash_array += i+1 + ".) "+ "Hash: " + hash + tab + "Data Owner: " + owner + tab + "Timestamp: " + date_str + tab + "Checksum: " + checksum + "<br />";
+                }
+                document.getElementById("hashlist").innerHTML = hash_array;
+                
+            }   
+            else{
+                //alert("Wallet not connected. Please connect your wallet!");
+                console.log("Wallet NOT connected :(");
+            }
+        }
+        else{
+            //alert("Wallet not connected. Please connect your wallet!");
+            console.log("Wallet NOT connected :(");
+        }
+    }
+
+    //upload ipfs hash
+    const uploadIPFSHash = async() => {
+        console.log("Uploading IPFS hash");
+        if(window.ethereum){
+            web3 = new Web3(window.ethereum);
+            const checkWallet = await web3.eth.getAccounts();
+            if(checkWallet.length > 0){
+        
+                //load player address
+                const playerAddress = checkWallet[0];
+                // document.getElementById("owneraddress").innerHTML = playerAddress;
+
+                //load contract
+                const contract = new web3.eth.Contract(abi, contractaddr);
+                //console.log(contract);
+
+                var input_hash = document.getElementById("uploadhash").value;
+                var checksum = document.getElementById("checksum").value;
+                document.getElementById("uploadstatus").innerHTML = "Uploading...";
+                var file_upload = await contract.methods.uploadHash(input_hash, playerAddress, checksum).send({from: playerAddress});
+                console.log(file_upload);
+                document.getElementById("uploadstatus").innerHTML = "Upload Success!";
+            }   
+            else{
+                //alert("Wallet not connected. Please connect your wallet!");
+                console.log("Wallet NOT connected :(");
+            }
+        }
+        else{
+            //alert("Wallet not connected. Please connect your wallet!");
+            console.log("Wallet NOT connected :(");
+        }
+    }
+
+    //add subscriber
+    const addSubs = async() => {
+        console.log("Adding subscriber");
+        if(window.ethereum){
+            web3 = new Web3(window.ethereum);
+            const checkWallet = await web3.eth.getAccounts();
+            if(checkWallet.length > 0){
+        
+                //load player address
+                const playerAddress = checkWallet[0];
+                // document.getElementById("owneraddress").innerHTML = playerAddress;
+
+                //load contract
+                const contract = new web3.eth.Contract(abi, contractaddr);
+                //console.log(contract);
+
+                //add new subscriber
+                var sub_addr = document.getElementById("addsub").value;
+                console.log(sub_addr);
+                document.getElementById("addsubstatus").innerHTML = "Adding...";
+                var new_sub = await contract.methods.addSubscriber(playerAddress, sub_addr).send({from: playerAddress});
+                document.getElementById("addsubstatus").innerHTML = "Success!";
+                console.log(new_sub);
+            }   
+            else{
+                //alert("Wallet not connected. Please connect your wallet!");
+                console.log("Wallet NOT connected :(");
+            }
+        }
+        else{
+            //alert("Wallet not connected. Please connect your wallet!");
+            console.log("Wallet NOT connected :(");
+        }
+    }
+
+    //add subscriber
+    const removeSubs = async() => {
+        console.log("Removing subscriber");
+        if(window.ethereum){
+            web3 = new Web3(window.ethereum);
+            const checkWallet = await web3.eth.getAccounts();
+            if(checkWallet.length > 0){
+        
+                //load player address
+                const playerAddress = checkWallet[0];
+                // document.getElementById("owneraddress").innerHTML = playerAddress;
+
+                //load contract
+                const contract = new web3.eth.Contract(abi, contractaddr);
+                //console.log(contract);
+
+                //add new subscriber
+                var sub_addr = document.getElementById("addsub").value;
+                console.log(sub_addr);
+                document.getElementById("addsubstatus").innerHTML = "Removing...";
+                var new_sub = await contract.methods.removeSubscriber(playerAddress, sub_addr).send({from: playerAddress});
+                document.getElementById("addsubstatus").innerHTML = "Success!";
+                console.log(new_sub);
+            }   
+            else{
+                //alert("Wallet not connected. Please connect your wallet!");
+                console.log("Wallet NOT connected :(");
+            }
+        }
+        else{
+            //alert("Wallet not connected. Please connect your wallet!");
+            console.log("Wallet NOT connected :(");
+        }
+    }
+
+    //get subscribers
+    const getSubs = async() => {
+        console.log("Getting subscribers list...");
+        if(window.ethereum){
+            web3 = new Web3(window.ethereum);
+            const checkWallet = await web3.eth.getAccounts();
+            if(checkWallet.length > 0){
+        
+                //load player address
+                const playerAddress = checkWallet[0];
+                // document.getElementById("owneraddress").innerHTML = playerAddress;
+
+                //load contract
+                const contract = new web3.eth.Contract(abi, contractaddr);
+                //console.log(contract);
+
+                //get subscribers list
+                var subs = await contract.methods.getSubscribers(playerAddress).call();
+                console.log(subs);
+
+                var subs_array = "";
+                for(var i = 0; i < subs.length; i++){
+                    var num = i+1;
+                    subs_array += num + ".) " + subs[i] + "\n";
+                }
+                document.getElementById("subslist").innerHTML = subs_array;
+            }   
+            else{
+                //alert("Wallet not connected. Please connect your wallet!");
+                console.log("Wallet NOT connected :(");
+            }
+        }
+        else{
+            //alert("Wallet not connected. Please connect your wallet!");
+            console.log("Wallet NOT connected :(");
+        }
+    }
+
+    //add publisher
+    const addPubs = async() => {
+        console.log("Adding publisher");
+        if(window.ethereum){
+            web3 = new Web3(window.ethereum);
+            const checkWallet = await web3.eth.getAccounts();
+            if(checkWallet.length > 0){
+        
+                //load player address
+                const playerAddress = checkWallet[0];
+                // document.getElementById("owneraddress").innerHTML = playerAddress;
+
+                //load contract
+                const contract = new web3.eth.Contract(abi, contractaddr);
+                //console.log(contract);
+
+                //add new publisher
+                var pub_addr = document.getElementById("addpub").value;
+                console.log(pub_addr);
+                document.getElementById("addpubstatus").innerHTML = "Adding...";
+                var new_pub = await contract.methods.addPublisher(playerAddress, pub_addr).send({from: playerAddress});
+                document.getElementById("addpubstatus").innerHTML = "Success!";
+                console.log(new_pub);
+            }   
+            else{
+                //alert("Wallet not connected. Please connect your wallet!");
+                console.log("Wallet NOT connected :(");
+            }
+        }
+        else{
+            //alert("Wallet not connected. Please connect your wallet!");
+            console.log("Wallet NOT connected :(");
+        }
+    }
+
+    //add publisher
+    const removePubs = async() => {
+        console.log("Removing publisher");
+        if(window.ethereum){
+            web3 = new Web3(window.ethereum);
+            const checkWallet = await web3.eth.getAccounts();
+            if(checkWallet.length > 0){
+        
+                //load player address
+                const playerAddress = checkWallet[0];
+                // document.getElementById("owneraddress").innerHTML = playerAddress;
+
+                //load contract
+                const contract = new web3.eth.Contract(abi, contractaddr);
+                //console.log(contract);
+
+                //add new publisher
+                var pub_addr = document.getElementById("addpub").value;
+                console.log(pub_addr);
+                document.getElementById("addpubstatus").innerHTML = "Removing...";
+                var new_pub = await contract.methods.removepublisher(playerAddress, pub_addr).send({from: playerAddress});
+                document.getElementById("addpubstatus").innerHTML = "Success!";
+                console.log(new_pub);
+            }   
+            else{
+                //alert("Wallet not connected. Please connect your wallet!");
+                console.log("Wallet NOT connected :(");
+            }
+        }
+        else{
+            //alert("Wallet not connected. Please connect your wallet!");
+            console.log("Wallet NOT connected :(");
+        }
+    }
+
+    //get publisher
+    const getPubs = async() => {
+        console.log("Getting publishers list...");
+        if(window.ethereum){
+            web3 = new Web3(window.ethereum);
+            const checkWallet = await web3.eth.getAccounts();
+            if(checkWallet.length > 0){
+        
+                //load player address
+                const playerAddress = checkWallet[0];
+                // document.getElementById("owneraddress").innerHTML = playerAddress;
+
+                //load contract
+                const contract = new web3.eth.Contract(abi, contractaddr);
+                //console.log(contract);
+
+                //get publishers list
+                var pubs = await contract.methods.getPublishers(playerAddress).call();
+                console.log(pubs);
+
+                var pubs_array = "";
+                for(var i = 0; i < pubs.length; i++){
+                    var num = i+1;
+                    pubs_array += num + ".) " + pubs[i] + "\n";
+                }
+                document.getElementById("pubslist").innerHTML = pubs_array;
+            }   
+            else{
+                //alert("Wallet not connected. Please connect your wallet!");
+                console.log("Wallet NOT connected :(");
+            }
+        }
+        else{
+            //alert("Wallet not connected. Please connect your wallet!");
+            console.log("Wallet NOT connected :(");
+        }
+    }
+
+    //test
+    const testFunc = async() => {
+        console.log("Testing...");
+        if(window.ethereum){
+            web3 = new Web3(window.ethereum);
+            const checkWallet = await web3.eth.getAccounts();
+            if(checkWallet.length > 0){
+        
+                //load player address
+                const playerAddress = checkWallet[0];
+                // document.getElementById("owneraddress").innerHTML = playerAddress;
+
+                //load contract
+                const contract = new web3.eth.Contract(abi, contractaddr);
+                //console.log(contract);
+
+                //add new dataowner
+                var sender = await contract.methods.msgsender().send({from: playerAddress});
+                var origin = await contract.methods.txorigin().send({from: playerAddress});
+                console.log("msg.sender: ");
+                console.log(sender);
+                console.log("tx.origin: ");
+                console.log(origin);
+            }   
+            else{
+                //alert("Wallet not connected. Please connect your wallet!");
+                console.log("Wallet NOT connected :(");
+            }
+        }
+        else{
+            //alert("Wallet not connected. Please connect your wallet!");
+            console.log("Wallet NOT connected :(");
+        }
+    }
+
+</script>

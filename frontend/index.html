@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.7.4-rc.1/web3.min.js"></script>
+</head>
+
+<body onload="checkFunc()">
+<script>
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const name = urlParams.get('name');
+</script>
+
+<h1 id="pagebanner" style="font-size:50px;margin-top:0px;margin-bottom:40px;">DSchain</h1>
+
+<div>
+    <div class="sidetext">
+        <p id="pagetitle" style="font-size:25px"><strong>Welcome to DSchain!</strong></p>
+    </div>
+    
+
+<div class="joinnetwork">
+	<input type="button" id="join" onClick="joinNet()" value="Join Network">
+</div>
+
+<div class="connectbutton">
+    <input type="button" id="connect" onClick="connectWallet()" value="Connect Wallet">
+</div>
+
+<script> 
+	const connectWallet = async() => {
+		if(window.ethereum){
+            await window.ethereum.request({method: "eth_requestAccounts"});
+            web3 = new Web3(window.ethereum);
+            const account = web3.eth.accounts;
+            const walletAddress = await web3.eth.getAccounts();
+            console.log("Wallet Address: %s", walletAddress[0]);
+        }
+        else{
+        	console.log("No web3 found");
+        }
+    }
+</script>
+
+<script> 
+	//import * as ref from "./reference.js";
+	const abi = [
+	{
+		"inputs": [],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "inputaddr",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "useraddr",
+				"type": "address"
+			}
+		],
+		"name": "addDataOwner",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "inputaddr",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "pubaddr",
+				"type": "address"
+			}
+		],
+		"name": "addPublisher",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "inputaddr",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "subaddr",
+				"type": "address"
+			}
+		],
+		"name": "addSubscriber",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "inputaddr",
+				"type": "address"
+			}
+		],
+		"name": "clearNotification",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "inputaddr",
+				"type": "address"
+			}
+		],
+		"name": "getHash",
+		"outputs": [
+			{
+				"components": [
+					{
+						"internalType": "string",
+						"name": "hash",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "timestamp",
+						"type": "uint256"
+					},
+					{
+						"internalType": "address",
+						"name": "dataowner",
+						"type": "address"
+					},
+					{
+						"internalType": "string",
+						"name": "checksum",
+						"type": "string"
+					}
+				],
+				"internalType": "struct DSchain.File[]",
+				"name": "",
+				"type": "tuple[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "inputaddr",
+				"type": "address"
+			}
+		],
+		"name": "getNotification",
+		"outputs": [
+			{
+				"internalType": "string[]",
+				"name": "",
+				"type": "string[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getOwner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "inputaddr",
+				"type": "address"
+			}
+		],
+		"name": "getPublishers",
+		"outputs": [
+			{
+				"internalType": "address[]",
+				"name": "",
+				"type": "address[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "inputaddr",
+				"type": "address"
+			}
+		],
+		"name": "getSubscribers",
+		"outputs": [
+			{
+				"internalType": "address[]",
+				"name": "",
+				"type": "address[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "inputaddr",
+				"type": "address"
+			}
+		],
+		"name": "hasNotification",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "inputaddr",
+				"type": "address"
+			}
+		],
+		"name": "isDataOwner",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "inputaddr",
+				"type": "address"
+			}
+		],
+		"name": "isUser",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "inputaddr",
+				"type": "address"
+			}
+		],
+		"name": "joinNetwork",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "msgsender",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "msgsenderpure",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "inputaddr",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "subaddr",
+				"type": "address"
+			}
+		],
+		"name": "removeSubscriber",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "inputaddr",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "pubaddr",
+				"type": "address"
+			}
+		],
+		"name": "removepublisher",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "txorigin",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "txoriginpure",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "hash",
+				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "inputaddr",
+				"type": "address"
+			},
+			{
+				"internalType": "string",
+				"name": "checksum",
+				"type": "string"
+			}
+		],
+		"name": "uploadHash",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+]
+
+	const address = "0x0cC97D70A3DB9241a3E4d52f51b818A97C8b01E6";
+
+	const checkFunc = async() => {
+		if(window.ethereum){
+            web3 = new Web3(window.ethereum);
+            const checkWallet = await web3.eth.getAccounts();
+            if(checkWallet.length > 0){
+                console.log("Wallet connected :)");
+                console.log("attempt 7");
+
+                //load player address
+                const playerAddress = checkWallet[0];
+                // document.getElementById("owneraddress").innerHTML = playerAddress;
+
+                //load contract
+                const contract = new web3.eth.Contract(abi, address);
+                console.log(contract);
+
+                var sender = await contract.methods.msgsender().call();
+                var origin = await contract.methods.txorigin().call();
+                console.log("msg.sender: ");
+                console.log(sender);
+                console.log("tx.origin: ");
+                console.log(origin); 
+
+                //check if user in network
+                const bool = await contract.methods.isUser(playerAddress).call();
+
+                if(bool){
+                	console.log("User in network :)");
+
+                	//check if dataowner or not
+                	const isDO = await contract.methods.isDataOwner(playerAddress).call();
+                	console.log(isDO);
+
+                	//redirect to dataowner.html
+                	if(isDO){
+                		alert("Welcome back DataOwner#"+playerAddress+"! Redirecting you to the DataOwner page...");
+                		location.href = "https://ak26252.github.io/dataowner";
+                	}
+                	//redirect to datarequester.html
+                	else{
+                		alert("Welcome back DataRequester#"+playerAddress+"! Redirecting you to the DataRequester page...");
+                		location.href = "https://ak26252.github.io/datarequester";
+                	}
+                }
+                else{
+                	alert("You are not in the network yet. Join the network!");
+                	console.log("User not in network :(");
+                }
+            }   
+            else{
+                alert("Wallet not connected. Please connect your wallet!");
+                console.log("Wallet NOT connected :(");
+            }
+        }
+        else{
+            alert("Wallet not connected. Please connect your wallet!");
+            console.log("Wallet NOT connected :(");
+        }
+    }
+
+	const joinNet = async() => {
+		if(window.ethereum){
+            web3 = new Web3(window.ethereum);
+            const checkWallet = await web3.eth.getAccounts();
+            if(checkWallet.length > 0){
+            	console.log("Wallet connected :)");
+
+            	//load player address
+                const playerAddress = checkWallet[0];
+                // document.getElementById("owneraddress").innerHTML = playerAddress;
+
+                //load contract
+                const contract = new web3.eth.Contract(abi, address);
+                console.log(contract);
+
+                //join network
+                const join = await contract.methods.joinNetwork(playerAddress).send({from: playerAddress});
+
+                alert("You have joined the network. Reload the page to get redirected to the correct page.");
+            }
+        	else{
+        		alert("Connect your wallet first!");
+        		console.log("Wallet not connected...");
+        	}
+        }
+        else{
+        	console.log("No web3 found...");
+        }
+	}
+</script>
