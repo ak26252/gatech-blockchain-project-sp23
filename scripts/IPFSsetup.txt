@@ -1,0 +1,50 @@
+#Remove all IPFS files#
+rm -rf ~/.ipfs/* (both)
+
+#Initialize IPFS#
+IPFS_PATH=~/.ipfs ipfs init (both)
+
+#Generate swarm.key#
+ipfs-swarm-key-gen > ~/.ipfs/swarm.key (copy to peer node)
+
+#Remove bootsrap nodes#
+IPFS_PATH=~/.ipfs ipfs bootstrap rm --all (both)
+
+#Get ip and node id#
+IPFS_PATH=~/.ipfs ipfs config show | grep "PeerID"
+ifconfig
+
+#Add bootsrap node#
+IPFS_PATH=~/.ipfs ipfs bootstrap add /ip4/<ip address of bootnode>/tcp/4001/ipfs/<peer identity hash of bootnode> (both)
+
+#Start IPFS network#
+export LIBP2P_FORCE_PNET=1 (both)
+IPFS_PATH=~/.ipfs ipfs daemon (both)
+
+#Upload Files#
+IPFS_PATH=~/.ipfs ipfs add <filename>
+
+#Download the file#
+wget http://127.0.0.1:8080/ipfs/<hash> -O <filename>
+
+#Host#
+1.) 	Encrypt file
+
+2.) 	Upload encrypted file and server key
+	IPFS_PATH=~/.ipfs ipfs add /home/kunho/testfiles/wustl-onlyint-FHE.csv
+	IPFS_PATH=~/.ipfs ipfs add /home/kunho/testfiles/ser_server_key.bin
+
+6.) 	Download operated file
+	ipfs get <hash> -o='/home/kunho/testfiles/wustl-onlyint-FHE-avg.csv' 
+
+7.) 	Decrypt file
+
+#Peer#
+3.) 	Download encrypted file and server key
+	ipfs get <hash> -o='/home/akim359/testfiles/wustl-onlyint-FHE.csv' 
+	ipfs get <hash> -o='/home/akim359/testfiles/ser_server_key.bin' 
+
+4.) 	Perform operation
+
+5.) 	Upload operated file
+	IPFS_PATH=~/.ipfs ipfs add /home/akim359/testfiles/wustl-onlyint-FHE-avg.csv
