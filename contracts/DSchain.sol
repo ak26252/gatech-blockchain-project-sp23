@@ -17,6 +17,7 @@ contract DSchain {
     struct User {
         address addr;
         bool isDataOwner;
+        string pubKey;
         address[] subscribers;
         address[] publishers;
         bool notification;
@@ -270,10 +271,11 @@ contract DSchain {
     -get timestamp
     -update subscriber file hash timestamp tuples
     */
-    function uploadHash(string memory hash, address inputaddr, string memory checksum) public returns (bool) {
+    function uploadHash(string memory hash, address inputaddr, string memory checksum) public payable returns (bool) {
         //require(msg.sender == tx.origin);
         require(userNetwork[inputaddr].addr != address(0x0), "YOU ARE NOT A CURRENT USER");
         require(msg.sender == inputaddr, "msg.sender != inputaddr");
+        require(msg.value > 1 ether, "need payment!");
 
         bool err = true;
 
@@ -293,6 +295,9 @@ contract DSchain {
                 userNetwork[sub].notification = true;
                 string memory addr = Strings.toHexString(uint256(uint160(inputaddr)),20);
                 userNetwork[sub].notification_contents.push(string.concat(addr," has sent you a new file!"));
+
+                //pay the user
+                payable(userNetwork[sub].addr).transfer(msg.value/(userNetwork[inputaddr].subscribers.length+1));
             }
             else{
                 err = false;
@@ -351,6 +356,24 @@ contract DSchain {
         return userNetwork[inputaddr].addr != address(0x0);
     }
 
+    /*
+    -add user public key
+    */
+    function addPublicKey(address inputaddr, string memory key) public {
+        require(userNetwork[inputaddr].addr != address(0x0), "YOU ARE NOT A CURRENT USER");
+        require(msg.sender == inputaddr, "msg.sender != inputaddr");
+
+        userNetwork[inputaddr].pubKey = key;
+    }
+    
+    /*
+    -get user public key
+    */
+    function getPublicKey(address inputaddr) public view returns (string memory){
+        require(userNetwork[inputaddr].addr != address(0x0), "YOU ARE NOT A CURRENT USER");
+        return userNetwork[inputaddr].pubKey;
+    }
+
     //TESTING FUNCTIONS
 
     //returns msg.sender
@@ -371,5 +394,9 @@ contract DSchain {
     //returns tx.origin
     function txorigin() public{
         origin = tx.origin;
+    }
+
+    receive() external payable{
+
     }
 }
