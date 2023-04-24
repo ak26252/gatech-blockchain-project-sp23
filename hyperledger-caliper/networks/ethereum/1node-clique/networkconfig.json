@@ -1,0 +1,401 @@
+{
+    "caliper": {
+        "blockchain": "ethereum",
+        "command" : {
+          }
+    },
+    "ethereum": {
+        "url": "ws://localhost:3334",
+        "contractDeployerAddress": "0x3A420384D03BADc9Ac092f80776E0257c00E68C1",
+        "contractDeployerAddressPassword": "",
+        "fromAddress": "0x3A420384D03BADc9Ac092f80776E0257c00E68C1",
+        "fromAddressPassword": "",
+        "transactionConfirmationBlocks": 2,
+        "contracts": {
+            "DSchain": {
+                "path": "./src/ethereum/simple/simple.json",
+                "estimateGas": true,
+                "gas": {
+                    "joinNetwork": 150000,
+                    "addSubscriber": 300000,
+                    "getSubscriber": 150000,
+                    "uploadHash": 150000,
+                    "getHash": 150000,
+                    "getNotification": 150000
+                },
+                "abi": [
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "useraddr",
+                "type": "address"
+            }
+        ],
+        "name": "addDataOwner",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "pubaddr",
+                "type": "address"
+            }
+        ],
+        "name": "addPublisher",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "subaddr",
+                "type": "address"
+            }
+        ],
+        "name": "addSubscriber",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            }
+        ],
+        "name": "clearNotification",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            }
+        ],
+        "name": "joinNetwork",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "msgsender",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "pubaddr",
+                "type": "address"
+            }
+        ],
+        "name": "removepublisher",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "subaddr",
+                "type": "address"
+            }
+        ],
+        "name": "removeSubscriber",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "txorigin",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "hash",
+                "type": "string"
+            },
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            },
+            {
+                "internalType": "string",
+                "name": "checksum",
+                "type": "string"
+            }
+        ],
+        "name": "uploadHash",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            }
+        ],
+        "name": "getHash",
+        "outputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "string",
+                        "name": "hash",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "timestamp",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "address",
+                        "name": "dataowner",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "string",
+                        "name": "checksum",
+                        "type": "string"
+                    }
+                ],
+                "internalType": "struct DSchain.File[]",
+                "name": "",
+                "type": "tuple[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            }
+        ],
+        "name": "getNotification",
+        "outputs": [
+            {
+                "internalType": "string[]",
+                "name": "",
+                "type": "string[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getOwner",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            }
+        ],
+        "name": "getPublishers",
+        "outputs": [
+            {
+                "internalType": "address[]",
+                "name": "",
+                "type": "address[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            }
+        ],
+        "name": "getSubscribers",
+        "outputs": [
+            {
+                "internalType": "address[]",
+                "name": "",
+                "type": "address[]"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            }
+        ],
+        "name": "hasNotification",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            }
+        ],
+        "name": "isDataOwner",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "inputaddr",
+                "type": "address"
+            }
+        ],
+        "name": "isUser",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "msgsenderpure",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "txoriginpure",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    }],
+                "address": "0x0bca4bCeCA46E9262AEe83D9d3C6DFf28d8971E7"
+            }
+        }
+    }
+}

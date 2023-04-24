@@ -1,0 +1,83 @@
+simpleArgs: &simple-args
+  initialMoney: 10000
+  moneyToTransfer: 100
+  numberOfAccounts: &number-of-accounts 1000
+
+test:
+  name: DSchain
+  description: >-
+    This is a benchmark for testing the performance of the main functionality of DSchain.
+  workers:
+    number: 15
+  rounds:
+    - label: joinNetwork
+      description: Test user joining the network.
+      txNumber: 1500
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 50
+      workload:
+        module: benchmarks/scenario/simple/joinNetwork.js
+        arguments: *simple-args
+    - label: addSubscriber
+      description: Test user adding a subscriber.
+      txNumber: 1500
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 50
+      workload:
+        module: benchmarks/scenario/simple/addSubscriber.js
+        arguments: *simple-args
+    - label: getSubscriber
+      description: Test user getting their subscribers.
+      txNumber: 1500
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 50
+      workload:
+        module: benchmarks/scenario/simple/getSubscriber.js
+        arguments: *simple-args
+    - label: uploadHash
+      description: Test user uploading a CID hash.
+      txNumber: 1500
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 50
+      workload:
+        module: benchmarks/scenario/simple/uploadHash.js
+        arguments: *simple-args
+    - label: getHash
+      description: Test user getting their CID hashes.
+      txNumber: 1500
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 50
+      workload:
+        module: benchmarks/scenario/simple/getHash.js
+        arguments: *simple-args
+    - label: getNotification
+      description: Test user getting their notifications.
+      txNumber: 1500
+      rateControl:
+        type: fixed-rate
+        opts:
+          tps: 50
+      workload:
+        module: benchmarks/scenario/simple/getNotification.js
+        arguments: *simple-args
+      # description: Test description for transfering money between accounts.
+      # txNumber: 50
+      # rateControl:
+      #   type: fixed-rate
+      #   opts:
+      #     tps: 5
+      # workload:
+      #   module: benchmarks/scenario/simple/transfer.js
+      #   arguments:
+      #     << : *simple-args
+      #     money: 100
