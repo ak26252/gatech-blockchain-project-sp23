@@ -297,7 +297,10 @@ contract DSchain {
                 userNetwork[sub].notification_contents.push(string.concat(addr," has sent you a new file!"));
 
                 //pay the user
-                payable(userNetwork[sub].addr).transfer(msg.value/(userNetwork[inputaddr].subscribers.length+1));
+                bool sent = payable(userNetwork[sub].addr).send(msg.value/(userNetwork[inputaddr].subscribers.length+1));
+                if(!sent){
+                    revert();
+                }
             }
             else{
                 err = false;
@@ -398,5 +401,9 @@ contract DSchain {
 
     receive() external payable{
 
+    }
+    
+    fallback() external payable{
+    
     }
 }
